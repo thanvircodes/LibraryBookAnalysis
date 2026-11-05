@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Loan Management</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <h1>Loan Management</h1>
+
+        <p>View borrowing records, loan status, and due dates.</p>
+
+        <!-- NAVIGATION -->
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('books') }}">Books</a>
+            <a href="{{ url_for('borrowers') }}">Borrowers</a>
+            <a href="{{ url_for('loan_management') }}">Loan Management</a>
+            <a href="{{ url_for('loans') }}">Issue and Return Books</a>
+            <a href="{{ url_for('analytics') }}">Analytics</a>
+        </nav>
+    </header>
+
+
+    <main>
+
+        <!-- INTRODUCTION -->
+        <section class="card">
+
+            <h2>Loan Management</h2>
+
+            <p>
+                View all borrowing transactions and track the status
+                of books borrowed by students.
+            </p>
+
+            <p>
+                To issue a new book or return a book,
+                open the Issue and Return Books page.
+            </p>
+
+            <a href="{{ url_for('loans') }}">
+                Open Issue and Return Books
+            </a>
+
+        </section>
+
+
+        <!-- SEARCH AND FILTER -->
+        <section class="card">
+
+            <h2>Search and Filter Loan Records</h2>
+
+            <form method="GET"
+                  action="{{ url_for('loan_management') }}">
+
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search book, student, or roll number"
+                    value="{{ search }}"
+                >
+
+                <select name="status">
+
+                    <option value="all"
+                        {% if status == 'all' %}selected{% endif %}>
+                        All Records
+                    </option>
+
+                    <option value="issued"
+                        {% if status == 'issued' %}selected{% endif %}>
+                        Issued
+                    </option>
+
+                    <option value="overdue"
+                        {% if status == 'overdue' %}selected{% endif %}>
+                        Overdue
+                    </option>
+
+                    <option value="returned"
+                        {% if status == 'returned' %}selected{% endif %}>
+                        Returned
+                    </option>
+
+                </select>
+
+                <button type="submit">
+                    Search / Filter
+                </button>
+
+                <a href="{{ url_for('loan_management') }}">
+                    Clear Filters
+                </a>
+
+            </form>
+
+        </section>
+
+
+        <!-- LOAN RECORDS -->
+        <section class="card">
+
+            <h2>All Loan Records</h2>
+
+            {% if loans %}
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Loan ID</th>
+                            <th>Student</th>
+                            <th>Roll Number</th>
+                            <th>Book</th>
+                            <th>Issue Date</th>
+                            <th>Due Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for loan in loans %}
+
+                        <tr>
+
+                            <td>{{ loan.loan_id }}</td>
+
+                            <td>{{ loan.borrower_name }}</td>
+
+                            <td>{{ loan.roll_no }}</td>
+
+                            <td>{{ loan.title }}</td>
+
+                            <td>{{ loan.issue_date }}</td>
+
+                            <td>{{ loan.due_date }}</td>
+
+                            <td>
+                                {{ loan.return_date or "-" }}
+                            </td>
+
+                            <td>
+
+                                {% if loan.return_date %}
+
+                                    <span class="status-badge returned">
+                                        Returned
+                                    </span>
+
+                                {% elif loan.due_date|string < today %}
+
+                                    <span class="status-badge overdue">
+                                        Overdue
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status-badge issued">
+                                        Issued
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+                <p>
+                    {% if search or status != 'all' %}
+                        No loan records match your search or selected filter.
+                    {% else %}
+                        No borrowing records are available yet.
+                    {% endif %}
+                </p>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+</body>
+</html>

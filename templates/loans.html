@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Issue and Return</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <h1>Book Issue and Return</h1>
+        <p>Manage library borrowing transactions.</p>
+        <a href="/">Home</a>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Issue a Book</h2>
+
+            <form method="POST">
+                <label>Student</label>
+                <select name="borrower_id" required>
+                    <option value="">Select Student</option>
+                    {% for borrower in borrowers %}
+                    <option value="{{ borrower.borrower_id }}">
+                        {{ borrower.borrower_name }} - {{ borrower.roll_no }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <label>Book</label>
+                <select name="book_id" required>
+                    <option value="">Select Book</option>
+                    {% for book in books %}
+                    <option value="{{ book.book_id }}">
+                        {{ book.title }} ({{ book.copies_available }} available)
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <label>Issue Date</label>
+                <input type="date" name="issue_date" required>
+
+                <label>Due Date</label>
+                <input type="date" name="due_date" required>
+
+                <button type="submit">Issue Book</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Borrowing Records</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Book</th>
+                        <th>Issue Date</th>
+                        <th>Due Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td>{{ loan.borrower_name }}</td>
+                        <td>{{ loan.title }}</td>
+                        <td>{{ loan.issue_date }}</td>
+                        <td>{{ loan.due_date }}</td>
+                        <td>{{ loan.return_date or "-" }}</td>
+                        <td>
+                            {% if loan.return_date %}
+                            Returned
+                            {% else %}
+                            Issued
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if not loan.return_date %}
+                            <form method="POST" action="{{ url_for('return_book', loan_id=loan.loan_id) }}"
+                                onsubmit="return confirm('Confirm that this book has been returned?');">
+                                <button type="submit">Return Book</button>
+                            </form>
+                            {% else %}
+                            Completed
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7">No borrowing records yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+</body>
+
+</html>

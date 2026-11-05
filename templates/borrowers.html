@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Borrower Management | Library Book Usage Analysis</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- Page Header -->
+    <header>
+
+        <h1>Borrower Management</h1>
+
+        <p>Register and manage students who borrow library books.</p>
+
+        <!-- Navigation -->
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('books') }}">Books</a>
+            <a href="{{ url_for('borrowers') }}">Borrowers</a>
+            <a href="{{ url_for('loan_management') }}">Loan Management</a>
+            <a href="{{ url_for('loans') }}">Issue and Return</a>
+            <a href="{{ url_for('analytics') }}">Analytics</a>
+        </nav>
+
+    </header>
+
+
+    <main>
+
+        <!-- Register a Borrower -->
+        <section class="card">
+
+            <h2>Register a Borrower</h2>
+
+            <p>Enter the student's details to register them in the library.</p>
+
+            <form method="POST" action="{{ url_for('borrowers') }}">
+
+                <label for="borrower_name">Student Name</label>
+
+                <input
+                    type="text"
+                    id="borrower_name"
+                    name="borrower_name"
+                    placeholder="Enter student name"
+                    required
+                >
+
+                <label for="roll_no">Roll Number</label>
+
+                <input
+                    type="text"
+                    id="roll_no"
+                    name="roll_no"
+                    placeholder="Enter student roll number"
+                    required
+                >
+
+                <button type="submit">Register Student</button>
+
+            </form>
+
+        </section>
+
+
+        <!-- Registered Students -->
+        <section class="card">
+
+            <h2>Registered Students</h2>
+
+            <p>Search for a student by name or roll number.</p>
+
+            <!-- Search Form -->
+            <form method="GET" action="{{ url_for('borrowers') }}">
+
+                <label for="search">Search Students</label>
+
+                <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    placeholder="Enter student name or roll number"
+                    value="{{ request.args.get('search', '') }}"
+                >
+
+                <button type="submit">Search</button>
+
+                <a href="{{ url_for('borrowers') }}">Clear Search</a>
+
+            </form>
+
+
+            <!-- Search Information -->
+            {% if request.args.get('search', '').strip() %}
+
+                <p>
+                    Search results for:
+                    <strong>{{ request.args.get('search', '').strip() }}</strong>
+                </p>
+
+            {% else %}
+
+                <p>Showing registered students in your database.</p>
+
+            {% endif %}
+
+
+            <!-- Students Table -->
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Borrower ID</th>
+                            <th>Student Name</th>
+                            <th>Roll Number</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for borrower in borrowers %}
+
+                        <tr>
+
+                            <td>{{ borrower.borrower_id }}</td>
+
+                            <td>{{ borrower.borrower_name }}</td>
+
+                            <td>{{ borrower.roll_no }}</td>
+
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+                            <td colspan="3">
+                                {% if request.args.get('search', '').strip() %}
+                                    No students match your search.
+                                {% else %}
+                                    No students registered yet.
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

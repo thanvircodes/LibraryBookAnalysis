@@ -1,0 +1,390 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Library Analytics Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Load Chart.js only once -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .analytics-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin: 20px 0;
+        }
+
+        .analytics-stat {
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #ffffff;
+            min-width: 0;
+        }
+
+        .analytics-stat h3 {
+            font-size: 15px;
+        }
+
+        .analytics-stat p {
+            font-size: 28px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .analytics-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .analytics-chart {
+            min-width: 0;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .chart-area {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        .analytics-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .chart-message {
+            padding: 12px;
+            text-align: center;
+            color: #555;
+        }
+
+        @media (max-width: 480px) {
+            .chart-area {
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Library Analytics Dashboard</h1>
+    <p>Understand book usage and borrowing activity</p>
+
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('books') }}">Books</a>
+        <a href="{{ url_for('borrowers') }}">Borrowers</a>
+        <a href="{{ url_for('loans') }}">Issue and Return</a>
+    </nav>
+</header>
+
+<main>
+
+    <section class="card">
+        <h2>Library Overview</h2>
+        <p>View statistics and borrowing trends from your library database.</p>
+    </section>
+
+    <!-- Summary statistics -->
+    <section class="analytics-stats">
+
+        <div class="analytics-stat">
+            <h3>Total Book Records</h3>
+            <p>{{ total_books }}</p>
+        </div>
+
+        <div class="analytics-stat">
+            <h3>Registered Borrowers</h3>
+            <p>{{ total_borrowers }}</p>
+        </div>
+
+        <div class="analytics-stat">
+            <h3>Currently Issued Books</h3>
+            <p>{{ currently_issued }}</p>
+        </div>
+
+        <div class="analytics-stat">
+            <h3>Overdue Books</h3>
+            <p>{{ overdue_books }}</p>
+        </div>
+
+    </section>
+
+    <!-- Charts -->
+    <section class="analytics-charts">
+
+        <div class="analytics-chart">
+            <h2>Most Borrowed Books</h2>
+            <div class="chart-area">
+                <canvas id="popularBooksChart"></canvas>
+            </div>
+            <p id="popularBooksMessage" class="chart-message" hidden>
+                No borrowing data available.
+            </p>
+        </div>
+
+        <div class="analytics-chart">
+            <h2>Monthly Borrowing Trends</h2>
+            <div class="chart-area">
+                <canvas id="monthlyTrendsChart"></canvas>
+            </div>
+            <p id="monthlyTrendsMessage" class="chart-message" hidden>
+                No monthly data available.
+            </p>
+        </div>
+
+        <div class="analytics-chart">
+            <h2>Category Analysis</h2>
+            <div class="chart-area">
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <p id="categoryMessage" class="chart-message" hidden>
+                No category data available.
+            </p>
+        </div>
+
+    </section>
+
+    <!-- Most borrowed books -->
+    <section class="card">
+        <h2>Most Borrowed Books — Details</h2>
+
+        {% if popular_books %}
+        <div class="analytics-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Times Borrowed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in popular_books %}
+                    <tr>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.borrow_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No borrowing records are available yet.</p>
+        {% endif %}
+    </section>
+
+    <!-- Monthly trends -->
+    <section class="card">
+        <h2>Monthly Borrowing Trends — Details</h2>
+
+        {% if monthly_trends %}
+        <div class="analytics-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Books Borrowed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in monthly_trends %}
+                    <tr>
+                        <td>{{ item.month }}</td>
+                        <td>{{ item.borrow_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No monthly borrowing data is available yet.</p>
+        {% endif %}
+    </section>
+
+    <!-- Category analysis -->
+    <section class="card">
+        <h2>Category Analysis — Details</h2>
+
+        {% if category_stats %}
+        <div class="analytics-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Books Borrowed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in category_stats %}
+                    <tr>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.borrow_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No category borrowing data is available yet.</p>
+        {% endif %}
+    </section>
+
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get chart data from Flask
+    const popularLabels = {{ popular_books | map(attribute='title') | list | tojson }};
+    const popularValues = {{ popular_books | map(attribute='borrow_count') | list | tojson }};
+
+    const monthlyLabels = {{ monthly_trends | map(attribute='month') | list | tojson }};
+    const monthlyValues = {{ monthly_trends | map(attribute='borrow_count') | list | tojson }};
+
+    const categoryLabels = {{ category_stats | map(attribute='category') | list | tojson }};
+    const categoryValues = {{ category_stats | map(attribute='borrow_count') | list | tojson }};
+
+    // Check whether Chart.js loaded
+    if (typeof Chart === "undefined") {
+        document.querySelectorAll(".chart-area").forEach(function (area) {
+            area.innerHTML =
+                "<p>Chart.js could not load. Check your internet connection and reload the page.</p>";
+        });
+        return;
+    }
+
+    function showNoData(canvasId, messageId) {
+        const canvas = document.getElementById(canvasId);
+        const message = document.getElementById(messageId);
+
+        if (canvas) {
+            canvas.hidden = true;
+        }
+
+        if (message) {
+            message.hidden = false;
+        }
+    }
+
+    function drawChart(canvasId, messageId, type, labels, values, label) {
+        const canvas = document.getElementById(canvasId);
+
+        if (!canvas) {
+            console.error("Canvas element not found:", canvasId);
+            return;
+        }
+
+        // Show a message if no data is available
+        if (!labels.length || !values.length) {
+            showNoData(canvasId, messageId);
+            return;
+        }
+
+        const numericValues = values.map(Number);
+
+        if (numericValues.some(function (value) {
+            return !Number.isFinite(value);
+        })) {
+            showNoData(canvasId, messageId);
+            console.error("Invalid chart values:", canvasId);
+            return;
+        }
+
+        new Chart(canvas, {
+            type: type,
+
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: numericValues,
+                    borderWidth: 2,
+                    tension: 0.25,
+                    backgroundColor: [
+                        "#FF9F43",
+                        "#FF006E",
+                        "#8338EC",
+                        "#00B4D8",
+                        "#36A2EB",
+                        "#4BC0C0",
+                        "#9966FF"
+                    ],
+                    borderColor: "#4B5563",
+                    fill: false
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: type === "doughnut",
+                        position: "bottom"
+                    }
+                },
+
+                scales: type === "doughnut" ? {} : {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart 1: Most borrowed books
+    drawChart(
+        "popularBooksChart",
+        "popularBooksMessage",
+        "bar",
+        popularLabels,
+        popularValues,
+        "Times Borrowed"
+    );
+
+    // Chart 2: Monthly borrowing trends
+    drawChart(
+        "monthlyTrendsChart",
+        "monthlyTrendsMessage",
+        "line",
+        monthlyLabels,
+        monthlyValues,
+        "Books Borrowed"
+    );
+
+    // Chart 3: Category analysis
+    drawChart(
+        "categoryChart",
+        "categoryMessage",
+        "doughnut",
+        categoryLabels,
+        categoryValues,
+        "Books Borrowed"
+    );
+
+});
+</script>
+
+</body>
+</html>
+

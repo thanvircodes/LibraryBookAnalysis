@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Book Management | Library Book Usage Analysis System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <h1>📚 Book Management</h1>
+        <p>Add books, search records, and manage your library collection.</p>
+
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('books') }}">Books</a>
+            <a href="{{ url_for('borrowers') }}">Borrowers</a>
+            <a href="{{ url_for('loan_management') }}">Loan Management</a>
+            <a href="{{ url_for('loans') }}">Issue / Return</a>
+            <a href="{{ url_for('analytics') }}">Analytics</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+        <!-- ADD BOOK FORM -->
+        <section class="card">
+
+            <h2>➕ Add a New Book</h2>
+
+            <p>
+                Enter the book details below to add a book to your library.
+            </p>
+
+            <form method="POST" action="{{ url_for('books') }}">
+
+                <label for="isbn">ISBN (optional)</label>
+                <input
+                    type="text"
+                    id="isbn"
+                    name="isbn"
+                    placeholder="Enter ISBN"
+                >
+
+                <label for="title">Book Title *</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="Enter book title"
+                    required
+                >
+
+                <label for="author">Author *</label>
+                <input
+                    type="text"
+                    id="author"
+                    name="author"
+                    placeholder="Enter author name"
+                    required
+                >
+
+                <label for="category">Category</label>
+                <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    placeholder="e.g. Computer Science, Fiction, History"
+                >
+
+                <label for="copies">Number of Copies</label>
+                <input
+                    type="number"
+                    id="copies"
+                    name="copies"
+                    min="0"
+                    value="1"
+                    required
+                >
+
+                <button type="submit">➕ Add Book</button>
+
+            </form>
+
+        </section>
+
+
+        <!-- BOOK COLLECTION -->
+        <section class="card">
+
+            <h2>📖 Library Book Collection</h2>
+
+            <p>
+                Search and view the books recorded in your database.
+            </p>
+
+            <!-- SEARCH FORM -->
+            <form method="GET" action="{{ url_for('books') }}">
+
+                <label for="search">Search Books</label>
+
+                <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    placeholder="Search by title, author, or ISBN"
+                    value="{{ request.args.get('search', '') }}"
+                >
+
+                <button type="submit">🔍 Search</button>
+
+                <a href="{{ url_for('books') }}">Clear Search</a>
+
+            </form>
+
+
+            <!-- SEARCH MESSAGE -->
+            {% if request.args.get('search', '').strip() %}
+                <p>
+                    Search results for:
+                    <strong>{{ request.args.get('search', '').strip() }}</strong>
+                </p>
+            {% else %}
+                <p>Showing all books currently recorded in your database.</p>
+            {% endif %}
+
+
+            <!-- BOOK TABLE -->
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Book ID</th>
+                            <th>ISBN</th>
+                            <th>Book Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Available Copies</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for book in books %}
+
+                            <tr>
+                                <td>{{ book.book_id }}</td>
+
+                                <td>{{ book.isbn or "-" }}</td>
+
+                                <td>
+                                    <strong>{{ book.title }}</strong>
+                                </td>
+
+                                <td>{{ book.author }}</td>
+
+                                <td>{{ book.category or "-" }}</td>
+
+                                <td>
+                                    {% if book.copies_available > 0 %}
+                                        <span class="status-badge returned">
+                                            {{ book.copies_available }} Available
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge overdue">
+                                            Out of Stock
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+                                <td colspan="6"
+                                    style="text-align: center; padding: 25px;">
+
+                                    {% if request.args.get('search', '').strip() %}
+                                        No books match your search.
+                                        Try another title, author, or ISBN.
+                                    {% else %}
+                                        No books have been added yet.
+                                        Use the form above to add your first book.
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer>
+        <p>
+            Library Book Usage Analysis System | Book Management
+        </p>
+    </footer>
+
+</body>
+
+</html>
+

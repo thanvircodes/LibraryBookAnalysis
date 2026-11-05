@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Book Usage Analysis System</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <h1>📚 Library Book Usage Analysis System</h1>
+        <p>Manage books and analyze library usage.</p>
+
+        <nav>
+            <a href="{{ url_for('books') }}">Books</a>
+            <a href="{{ url_for('borrowers') }}">Borrowers</a>
+            <a href="{{ url_for('loans') }}">Issue / Return</a>
+            <a href="{{ url_for('loan_management') }}">Loan Management</a>
+            <a href="{{ url_for('analytics') }}">Analytics</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="card dashboard">
+            <h2>📊 Library Dashboard</h2>
+            <p>Here is your library's current status.</p>
+
+            <div class="dashboard-grid">
+
+                <div class="stat-card books-stat">
+                    <h3>Total Books</h3>
+                    <p class="stat-number">{{ total_books }}</p>
+                </div>
+
+                <div class="stat-card borrowers-stat">
+                    <h3>Total Borrowers</h3>
+                    <p class="stat-number">{{ total_borrowers }}</p>
+                </div>
+
+                <div class="stat-card issued-stat">
+                    <h3>Currently Issued</h3>
+                    <p class="stat-number">{{ currently_issued }}</p>
+                </div>
+
+                <div class="stat-card overdue-stat">
+                    <h3>Overdue Books</h3>
+                    <p class="stat-number">{{ overdue_books }}</p>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="dashboard-links">
+
+            <section class="card">
+                <h2>📚 Book Management</h2>
+                <p>Add, search, and manage library book records.</p>
+                <a href="{{ url_for('books') }}">Open Book Management →</a>
+            </section>
+
+            <section class="card">
+                <h2>🔄 Loan Management</h2>
+                <p>View borrowing records, loan status, and due dates.</p>
+                <a href="{{ url_for('loan_management') }}">Open Loan Management →</a>
+            </section>
+
+            <section class="card">
+                <h2>📈 Library Analytics</h2>
+                <p>Analyze popular books and borrowing trends.</p>
+                <a href="{{ url_for('analytics') }}">Open Library Analytics →</a>
+            </section>
+
+            <section class="card">
+                <h2>👨‍🎓 Borrower Management</h2>
+                <p>Register students and view their details.</p>
+                <a href="{{ url_for('borrowers') }}">Open Borrower Management →</a>
+            </section>
+
+            <section class="card">
+                <h2>📖 Issue and Return Books</h2>
+                <p>Issue books to students and process book returns.</p>
+                <a href="{{ url_for('loans') }}">Open Issue and Return Management →</a>
+            </section>
+
+        </div>
+
+    </main>
+
+    <footer>
+        <p>Library Book Usage Analysis System | Book Management & Analytics</p>
+    </footer>
+
+    <!-- Project Credit and Dynamic Tagline -->
+    <footer class="project-credit">
+        <strong>Developed by Team-5</strong>
+        <span id="tagline">Manage Books. Track Loans. Discover Insights.</span>
+    </footer>
+
+    <script>
+        const taglines = [
+            "Manage Books. Track Loans. Discover Insights.",
+            "Transform Library Data into Meaningful Insights.",
+            "Smarter Libraries Through Data Analytics.",
+            "Track Borrowing. Analyze Trends. Improve Decisions.",
+            "Organize. Analyze. Optimize.",
+            "Every Book Counts. Every Insight Matters.",
+            "Making Library Management Smarter.",
+            "Turning Borrowing Records into Better Decisions.",
+            "Discover Trends. Improve Library Performance.",
+            "Your Library, Powered by Data.",
+            "Simplifying Library Management Through Technology.",
+            "Better Records. Smarter Decisions.",
+            "Track Books. Understand Usage. Improve Efficiency.",
+            "Where Library Management Meets Data Analytics.",
+            "Making Every Library Resource Count."
+        ];
+
+        const previousTagline = sessionStorage.getItem("previousTagline");
+
+        let availableTaglines = taglines.filter(
+            tagline => tagline !== previousTagline
+        );
+
+        const randomIndex = Math.floor(
+            Math.random() * availableTaglines.length
+        );
+
+        const newTagline = availableTaglines[randomIndex];
+
+        document.getElementById("tagline").textContent = newTagline;
+
+        sessionStorage.setItem("previousTagline", newTagline);
+    </script>
+
+</body>
+</html>
