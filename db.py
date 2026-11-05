@@ -9,7 +9,7 @@ def get_connection():
             host="localhost",
             port=3306,
             user="root",
-            password="Thanvir@2007",  # Enter your MySQL password
+            password="Thanvir@1234567",  # Enter your MySQL password
             database="library_db"
         )
 
